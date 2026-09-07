@@ -1,5 +1,7 @@
 Constraint = Object:extend()
 
+local iso = require("iso")
+
 -- creates new instance of Constraint
 function Constraint:new(index,node,axis)
     self.index = index
@@ -16,8 +18,7 @@ end
 
 -- draws the constraint
 function Constraint:draw()
-    love.graphics.setColor({0.8, 0, 0.8, 0.8})
-    love.graphics.setLineWidth(0.05)
+    love.graphics.setColor(settings.constraints_color)
     local node = Nodes[self.node]
     local x = node.x
     local y = node.y
@@ -39,6 +40,53 @@ function Constraint:draw()
             x,     y,
             x - s, y + s * 0.5,
             x - s, y - s * 0.5
+        )
+    end
+end
+
+
+-- draws the constraint
+function Constraint:draw3d()
+    love.graphics.setColor(settings.constraints_color)
+    local node = Nodes[self.node]
+    local x = node.x
+    local y = node.y
+    local z = node.z
+    local s = 0.1
+
+    if self.axis == "X" then
+        y = y - 0.075
+        -- Pin resisting Y movement
+        local x1,y1 = iso(x,y,z)
+        local x2,y2 = iso(x - s * 0.5,y - s,z)
+        local x3,y3 = iso(x + s * 0.5,y - s,z)
+        love.graphics.polygon("fill",
+            x1, y1,
+            x2, y2,
+            x3, y3
+        )
+
+    elseif self.axis == "Y" then
+        x = x - 0.075
+        -- Pin resisting Y movement
+        local x1,y1 = iso(x,y,z)
+        local x2,y2 = iso(x - s,y - s * 0.5,z)
+        local x3,y3 = iso(x - s,y + s * 0.5,z)
+        love.graphics.polygon("fill",
+            x1, y1,
+            x2, y2,
+            x3, y3
+        )
+    elseif self.axis == "Z" then
+        z = z - 0.075
+        -- Pin resisting Y movement
+        local x1,y1 = iso(x,y,z)
+        local x2,y2 = iso(x,y - s * 0.5,z - s)
+        local x3,y3 = iso(x,y + s * 0.5,z - s)
+        love.graphics.polygon("fill",
+            x1, y1,
+            x2, y2,
+            x3, y3
         )
     end
 end

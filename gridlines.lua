@@ -1,5 +1,7 @@
 Gridlines = Object:extend()
 
+local iso = require("iso")
+
 function Gridlines:new()
     self.spacing = settings.gridlines_spacing
     self.thickness = settings.gridlines_thickness
@@ -33,4 +35,38 @@ function Gridlines:draw()
         local sy = y
         love.graphics.line(left, sy, right, sy)
     end
+end
+
+
+function Gridlines:draw2d()
+
+    love.graphics.setColor(self.color)
+    love.graphics.setLineWidth(self.thickness)
+
+    local inf = 10000
+
+    love.graphics.line(inf,0,-inf,0)
+
+    love.graphics.line(0,inf,0,-inf)
+end
+
+function Gridlines:draw3d()
+
+    love.graphics.setColor(self.color)
+    love.graphics.setLineWidth(self.thickness)
+
+    local inf = 10000
+    -- draw x axis
+    local x1, y1 = iso(inf,0,0)
+    local x2, y2 = iso(-inf,0,0)
+    love.graphics.line(x1,y1,x2,y2)
+    -- draw y axis
+    x1, y1 = iso(0,inf,0)
+    x2, y2 = iso(0,-inf,0)
+    love.graphics.line(x1,y1,x2,y2)
+    -- draw z axis
+    x1, y1 = iso(0,0,inf)
+    x2, y2 = iso(0,0,-inf)
+    love.graphics.line(x1,y1,x2,y2)
+
 end

@@ -2,6 +2,7 @@ Load = Object:extend()
 
 local normalize = require("normalize")
 local direction = require("direction")
+local iso = require("iso")
 
 -- create new instance of Load
 function Load:new(index,node,axis,magnitude)
@@ -24,11 +25,11 @@ function Load:draw()
     local node = Nodes[self.node]
     local x = node.x
     local y = node.y
-    local dx, dy = direction(self.axis)
+    local dx, dy,dz = direction(self.axis)
 
-    dx, dy = normalize(dx * self.magnitude, dy * self.magnitude)
+    dx, dy, dz = normalize(dx * self.magnitude, dy * self.magnitude,dz * self.magnitude)
 
-    love.graphics.setColor({1, 1, 0, 1})
+    love.graphics.setColor(settings.load_color)
     love.graphics.setLineWidth(0.01)
     love.graphics.line(x,y,x + dx * s, y + dy * s)
 
@@ -37,5 +38,30 @@ function Load:draw()
         local N = math.abs(self.magnitude)
         love.graphics.setColor({0.8, 0.8, 0, 1})
         love.graphics.print(N .. " N",x + dx * s * 1.2,y + dy * s * 1.2,0,0.005,-0.005)
+    end
+end
+
+-- draw the load
+function Load:draw3d()
+    local s = 0.5 -- scale
+    local node = Nodes[self.node]
+    local x = node.x
+    local y = node.y
+    local z = node.z
+    local dx, dy,dz = direction(self.axis)
+
+    dx, dy, dz = normalize(dx * self.magnitude, dy * self.magnitude,dz * self.magnitude)
+    x,y = iso(x,y,z)
+    dx,dy = iso(dx * s,dy  * s,dz  * s)
+
+    love.graphics.setColor(settings.load_color)
+    love.graphics.setLineWidth(0.01)
+    love.graphics.line(x,y,x + dx, y + dy)
+
+    -- print magnitude
+    if settings.draw_load_magnitude then
+        local N = math.abs(self.magnitude)
+        love.graphics.setColor({0.8, 0.8, 0, 1})
+        love.graphics.print(N .. " N",x + dx * 1.2,y + dy * 1.2,0,0.005,-0.005)
     end
 end

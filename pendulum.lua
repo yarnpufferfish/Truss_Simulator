@@ -1,5 +1,10 @@
 local truss_data = {}
 
+-- Simulation
+truss_data.time_step = 0.0001
+truss_data.node_damping = 0.1
+
+
 -- Dimension
 truss_data.dimensions = 2
 
@@ -16,8 +21,7 @@ truss_data.joints = {
     example {1, 10, 10}
     ]]--
     {1, 0.0, 0.0},
-    {2, 1.0, 0.0},
-    {3, 0.5, 0.5}
+    {2, 1.0, 2.0},
 }
 
 -- all members are assumed to be circular rods
@@ -28,8 +32,6 @@ truss_data.members = {
     example {1, 1, 2, 1e-2, "Aluminum"}
     ]]--
     {1, 1, 2, 1e-2, "Aluminum"},
-    {2, 2, 3, 1e-2, "Aluminum"},
-    {3, 1, 3, 1e-2, "Aluminum"}
 }
 
 truss_data.constraints = {
@@ -40,7 +42,6 @@ truss_data.constraints = {
     ]]--
     {1, 1, "X"},
     {2, 1, "Y"},
-    {3, 2, "Y"}
 }
 
 -- loads are defaulted to newtons
@@ -50,7 +51,6 @@ truss_data.loads = {
     {index, node index, axis, force}
     example {1, 3, "Y", 1e4}
     ]]--
-    {1, 3, "Y", -1e5}
 }
 
 return truss_data
