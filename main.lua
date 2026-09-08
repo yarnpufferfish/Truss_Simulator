@@ -2,7 +2,11 @@
 
 --- Taj Clark
 --- Sept 1, 2026
---- 2D structural simulator
+--- 2D Structural simulator
+
+-- ENTER FILE NAME HERE
+-- example files: "truss_3d_extruded.txt" , "truss_2d.txt" , "truss_3d.txt", "pratt_bridge"
+text_file_name = "truss_3d.txt"
 
 -- Class Building Tool
 Object = require("classic")
@@ -15,19 +19,20 @@ require("constraint")
 accumulator = 0
 local round = require("round")
 local iso = require("iso")
+local parse_truss_data = require("parse_truss_data")
+local direction = require("direction")
 
 function love.load()
-    -- ENTER FILE NAME HERE
-    -- example files: "pendulum" , "double_pendulum" , "pratt_bridge"
-    file_name = "double_pendulum"
-
-    -- DO NOT CHANGE ANYTHING DOWN FROM HERE
-    Truss_data = require(file_name)
-    Truss_data.total_timesteps = 0
-    Truss_data.total_time = 0
+    -- Simulation settings
     Load_Tools()
 
-    -- build the simulation
+    -- Load Truss Data
+    data, size = love.filesystem.read(text_file_name)
+    Truss_data = parse_truss_data(data)
+
+    settings.view_dimension = Truss_data.dimensions
+
+    -- Build the simulation
     Reset_Truss()
     Build_Truss()
     Calculate_Mass()
@@ -65,9 +70,6 @@ function love.draw()
 
     camera:attach()
 
-
-
-
     if settings.view_dimension == 2 then
         -- Draw gridlines
         gridlines:draw2d()
@@ -81,7 +83,7 @@ function love.draw()
         Draw_Nodes()
         Draw_Constraints()
         Draw_Loads()
-
+        Draw_Reactions()
         Draw_Axis()
 
     else
@@ -93,18 +95,15 @@ function love.draw()
         Draw_Spawn_Members3d()
 
         -- Draw current structure
-        Draw_Members3d()
+        
         Draw_Nodes3d()
+        Draw_Members3d()
         Draw_Constraints3d()
         Draw_Loads3d()
-
+        Draw_Reactions3d()
         Draw_Axis3d()
 
     end
-
-
-
-
 
     camera:detach()
 
@@ -138,35 +137,99 @@ function love.draw()
             offset = offset + 10
         end
     end
-
 end
 
 -- create all truss data objects
 function Build_Truss()
     Truss_data.alpha = math.exp(-Truss_data.node_damping * Truss_data.time_step)
 
+    local num_joints = #Truss_data.joints
+    local num_members = #Truss_data.members
 
-    if Truss_data.dimensions == 1 then
-        -- create nodes
-        for _,j in pairs(Truss_data.joints) do
-            Node(j[1],j[2],0,0)
-        end
-    elseif Truss_data.dimensions == 2 then
-        -- create nodes
-        for _,j in pairs(Truss_data.joints) do
-            Node(j[1],j[2],j[3],0)
-        end
-    elseif Truss_data.dimensions == 3 then
-        -- create nodes
-        for _,j in pairs(Truss_data.joints) do
-            Node(j[1],j[2],j[3],j[4])
+    local extrude = Truss_data.extrude
+    local pattern = Truss_data.pattern
+    local layers = Truss_data.layers
+    local depth = Truss_data.depth
+    local dx, dy, dz
+    if extrude then
+        dx, dy, dz = direction(extrude)
+    else
+        dx,dy,dz = 0,0,0
+    end
+    dx, dy, dz = dx * depth, dy * depth, dz * depth
+
+    for i = 0,layers do
+        if Truss_data.dimensions == 1 then
+            -- create nodes
+            for _,j in pairs(Truss_data.joints) do
+                Node(j[1] + i * num_joints,j[2] + dx * i,0,0)
+            end
+        elseif Truss_data.dimensions == 2 then
+            -- create nodes
+            for _,j in pairs(Truss_data.joints) do
+                Node(j[1] + i * num_joints,j[2] + dx * i,j[3] + dy * i,0)
+            end
+        elseif Truss_data.dimensions == 3 then
+            -- create nodes
+            for _,j in pairs(Truss_data.joints) do
+                Node(j[1] + i * num_joints,j[2] + dx * i,j[3] + dy * i,j[4] + dz * i)
+            end
         end
     end
 
     -- create members
-    for _,m in pairs(Truss_data.members) do
-        Member(m[1],m[2],m[3],m[4],m[5])
+    for i = 0,layers do
+        for _,m in pairs(Truss_data.members) do
+            Member(m[1] + i * num_members,m[2] + i * num_joints,m[3] + i * num_joints,m[4],m[5])
+        end
     end
+
+    -- create extrude members
+    local r = settings.extrude_member_r
+    local material = settings.extrude_member_material
+    for i = 0,layers - 1 do
+        for _,j in pairs(Truss_data.joints) do
+            Member(#Members + 1,j[1] + i * num_joints,j[1] + (i + 1) * num_joints,r,material)
+        end
+    end
+
+    local pattern_r = settings.extrude_member_r
+    local pattern_material = settings.extrude_member_material
+    if pattern then
+        for i = 1,layers do
+            for j = 1,num_joints do
+                local n1 = j + (i - 1) * num_joints
+                local k
+                if j == num_joints then
+                    k = 1
+                else
+                    k = j + 1
+                end
+                local nplus =  k + (i) * num_joints
+                local b
+                if j == 1 then
+                    b = num_joints
+                else
+                    b = j - 1
+                end
+                local nminus = b + (i) * num_joints
+                if pattern == "FORWARD" then
+                    Member(#Members + 1, n1, nplus, pattern_r, pattern_material)
+                elseif pattern == "BACKWARD" then
+                    Member(#Members + 1, n1, nminus, pattern_r, pattern_material)
+                elseif pattern == "CROSS" then
+                    Member(#Members + 1, n1, nplus, pattern_r, pattern_material)
+                    Member(#Members + 1, n1, nminus, pattern_r, pattern_material)
+                end
+            end
+        end
+    end
+
+    -- sort the order of Members by draw order
+
+    SortMembersForDrawing()
+
+
 
     -- create constraints
     for _,c in pairs(Truss_data.constraints) do
@@ -195,6 +258,8 @@ end
 
 -- resets the list of all objects
 function Reset_Truss()
+    Truss_data.total_timesteps = 0
+    Truss_data.total_time = 0
     Nodes = {}
     Members = {}
     Loads = {}
@@ -234,8 +299,6 @@ end
 function Load_Tools()
     -- set settings
     settings = require("settings")
-    settings.view_dimension = Truss_data.dimensions
-
     tool_mode = "move"
     require("camera")
     camera = Camera()
@@ -415,6 +478,22 @@ function Draw_Loads3d()
     end
 end
 
+-- draw all reaction in 2d
+function Draw_Reactions()
+    if settings.draw_node_reactions then
+        for _,node in pairs(Nodes) do
+            node:draw_reactions()
+        end
+    end
+end
+-- draw all reaction in 3d
+function Draw_Reactions3d()
+    if settings.draw_node_reactions then
+        for _,node in pairs(Nodes) do
+            node:draw_reactions3d()
+        end
+    end
+end
 -- use mouse tool
 function InputHandler(dt)
     -- TOOL HANDLER
@@ -442,13 +521,27 @@ function love.keypressed(key)
     elseif key == "3" then
         settings.view_dimension = 3
     elseif key == "space" then
-        if settings.run_simulation then
-            settings.run_simulation = false
-        else
-            settings.run_simulation = true
-        end
+        Toggle_Pause()
+    elseif key == "w" then
+        settings.camera_pitch = settings.camera_pitch + 0.05
+        SortMembersForDrawing()
+    elseif key == "s" then
+        settings.camera_pitch = settings.camera_pitch - 0.05
+        SortMembersForDrawing()
+    elseif key == "a" then
+        settings.camera_yaw = settings.camera_yaw - 0.05
+        SortMembersForDrawing()
+    elseif key == "d" then
+        settings.camera_yaw = settings.camera_yaw + 0.05
+        SortMembersForDrawing()
+
+    elseif key == "r" then
+        -- Build the simulation
+        Reset_Truss()
+        Build_Truss()
+        Calculate_Mass()
+        settings.run_simulation = false
     end
-    
 end
 
 -- calls functions when mouse wheel is scrolled
@@ -456,4 +549,33 @@ function love.wheelmoved(x, y)
     if mouse then
         mouse:wheelmoved(x, y)
     end
+end
+
+-- toggle settings.run_simulation
+function Toggle_Pause()
+    if settings.run_simulation then
+        settings.run_simulation = false
+    else
+        settings.run_simulation = true
+    end
+end
+
+function SortMembersForDrawing()
+    table.sort(Members, function(a, b)
+
+        local a1 = Nodes[a.node_1]
+        local a2 = Nodes[a.node_2]
+        local b1 = Nodes[b.node_1]
+        local b2 = Nodes[b.node_2]
+
+        local depth_a =
+            (-a1.x - a1.y - a1.z
+             -a2.x - a2.y - a2.z) * 0.5
+
+        local depth_b =
+            (-b1.x - b1.y - b1.z
+             -b2.x - b2.y - b2.z) * 0.5
+
+        return depth_a > depth_b
+    end)
 end

@@ -118,15 +118,15 @@ function Node:update()
         if constraint.axis == "X" then
             self.x = self.spawn_x
             self.vx = 0
-            self.rx = -self.fx
+            self.rx = -self.ax * self.m
         elseif constraint.axis == "Y" then
             self.y = self.spawn_y
             self.vy = 0
-            self.ry = -self.fy
+            self.ry = -self.ay * self.m
         elseif constraint.axis == "Z" then
             self.z = self.spawn_z
             self.vz = 0
-            self.rz = -self.fz
+            self.rz = -self.az * self.m
         end
     end
 end
@@ -200,48 +200,6 @@ function Node:draw()
         love.graphics.setColor(settings.text_color)
         love.graphics.print(self.index,self.x + 0.05,self.y - 0.05,0,0.005,-0.005)
     end
-    if settings.draw_node_reactions then
-        if self.rx then
-            local s = 0.5 -- scale
-            local dx, dy, dz = direction("X")
-            if round(self.rx) == 0 then
-                s = 0
-            else
-                dx, dy, dz = normalize(dx * self.rx, dy * self.rx, dz * self.rx)
-            end
-            love.graphics.setColor(settings.reaction_color)
-            love.graphics.setLineWidth(0.01)
-            love.graphics.line(self.x,self.y,self.x + dx * s,self.y + dy * s)
-
-            -- print magnitude
-            if settings.draw_load_magnitude then
-                local N = round(math.abs(self.rx))
-                love.graphics.setColor(settings.reaction_color)
-                love.graphics.print(N .. " N",self.x + dx * s * 1.2,self.y + dy * s * 1.2,0,0.005,-0.005)
-            end
-        end
-        if self.ry then
-            local s = 0.5 -- scale
-
-            local dx, dy, dz = direction("Y")
-            if round(self.ry) == 0 then
-                s = 0
-            else
-                dx, dy = normalize(dx * self.ry, dy * self.ry,  dz * self.ry)
-            end
-
-            love.graphics.setColor(settings.reaction_color)
-            love.graphics.setLineWidth(0.01)
-            love.graphics.line(self.x,self.y,self.x + dx * s,self.y + dy * s)
-
-            -- print magnitude
-            if settings.draw_load_magnitude then
-                local N = round(math.abs(self.ry))
-                love.graphics.setColor(settings.reaction_color)
-                love.graphics.print(N .. " N",self.x + dx * s * 1.2,self.y + dy * s * 1.2,0,0.005,-0.005)
-            end
-        end
-    end
 end
 
 -- draw the spawn location of the node in 2d
@@ -261,68 +219,6 @@ function Node:draw3d()
         love.graphics.setColor(settings.text_color)
         love.graphics.print(self.index,x + 0.05,y + 0.05,0,0.005,-0.005)
     end
-    if settings.draw_node_reactions then
-        if self.rx then
-            local s = 0.5 -- scale
-            local dx, dy, dz = direction("X")
-            if round(self.rx) == 0 then
-                s = 0
-            else
-                dx, dy, dz = normalize(dx * self.rx, dy * self.rx, dz * self.rx)
-            end
-            dx, dy = iso(dx  * s,dy  * s,dz  * s)
-            love.graphics.setColor(settings.reaction_color)
-            love.graphics.setLineWidth(0.01)
-            love.graphics.line(x,y,x + dx,y + dy)
-
-            -- print magnitude
-            if settings.draw_load_magnitude then
-                local N = round(math.abs(self.rx))
-                love.graphics.setColor(settings.reaction_color)
-                love.graphics.print(N .. " N",x + dx * 1.2,y + dy * 1.2,0,0.005,-0.005)
-            end
-        end
-        if self.ry then
-            local s = 0.5 -- scale
-            local dx, dy, dz = direction("Y")
-            if round(self.ry) == 0 then
-                s = 0
-            else
-                dx, dy, dz = normalize(dx * self.ry, dy * self.ry, dz * self.ry)
-            end
-            dx, dy = iso(dx * s,dy * s,dz * s)
-            love.graphics.setColor(settings.reaction_color)
-            love.graphics.setLineWidth(0.01)
-            love.graphics.line(x,y,x + dx,y + dy)
-
-            -- print magnitude
-            if settings.draw_load_magnitude then
-                local N = round(math.abs(self.ry))
-                love.graphics.setColor(settings.reaction_color)
-                love.graphics.print(N .. " N",x + dx * 1.2,y + dy * 1.2,0,0.005,-0.005)
-            end
-        end
-        if self.rz and Truss_data.dimensions == 3 then
-            local s = 0.5 -- scale
-            local dx, dy, dz = direction("Z")
-            if round(self.rz) == 0 then
-                s = 0
-            else
-                dx, dy, dz = normalize(dx * self.rz, dy * self.rz, dz * self.rz)
-            end
-            dx, dy = iso(dx * s,dy * s,dz * s)
-            love.graphics.setColor(settings.reaction_color)
-            love.graphics.setLineWidth(0.01)
-            love.graphics.line(x,y,x + dx,y + dy)
-
-            -- print magnitude
-            if settings.draw_load_magnitude then
-                local N = round(math.abs(self.rz))
-                love.graphics.setColor(settings.reaction_color)
-                love.graphics.print(N .. " N",x + dx * 1.2,y + dy * 1.2,0,0.005,-0.005)
-            end
-        end
-    end
 end
 
 -- draw the spawn location of the node in 3d
@@ -330,4 +226,111 @@ function Node:draw_original3d()
     love.graphics.setColor({1,1,1,0.5})
     local x,y = iso(self.spawn_x,self.spawn_y,self.spawn_z)
     love.graphics.circle("fill",x,y,settings.node_radius)
+end
+
+function Node:draw_reactions3d()
+    local x, y = iso(self.x,self.y,self.z)
+    if self.rx then
+        local s = 0.5 -- scale
+        local dx, dy, dz = direction("X")
+        if round(self.rx) == 0 then
+            s = 0
+        else
+            dx, dy, dz = normalize(dx * self.rx, dy * self.rx, dz * self.rx)
+        end
+        dx, dy = iso(dx  * s,dy  * s,dz  * s)
+        love.graphics.setColor(settings.reaction_color)
+        love.graphics.setLineWidth(0.01)
+        love.graphics.line(x,y,x + dx,y + dy)
+
+        -- print magnitude
+        if settings.draw_load_magnitude then
+            local N = round(math.abs(self.rx))
+            love.graphics.setColor(settings.reaction_color)
+            love.graphics.print(N .. " N",x + dx * 1.2,y + dy * 1.2,0,0.005,-0.005)
+        end
+    end
+    if self.ry then
+        local s = 0.5 -- scale
+        local dx, dy, dz = direction("Y")
+        if round(self.ry) == 0 then
+            s = 0
+        else
+            dx, dy, dz = normalize(dx * self.ry, dy * self.ry, dz * self.ry)
+        end
+        dx, dy = iso(dx * s,dy * s,dz * s)
+        love.graphics.setColor(settings.reaction_color)
+        love.graphics.setLineWidth(0.01)
+        love.graphics.line(x,y,x + dx,y + dy)
+
+        -- print magnitude
+        if settings.draw_load_magnitude then
+            local N = round(math.abs(self.ry))
+            love.graphics.setColor(settings.reaction_color)
+            love.graphics.print(N .. " N",x + dx * 1.2,y + dy * 1.2,0,0.005,-0.005)
+        end
+    end
+    if self.rz and Truss_data.dimensions == 3 then
+        local s = 0.5 -- scale
+        local dx, dy, dz = direction("Z")
+        if round(self.rz) == 0 then
+            s = 0
+        else
+            dx, dy, dz = normalize(dx * self.rz, dy * self.rz, dz * self.rz)
+        end
+        dx, dy = iso(dx * s,dy * s,dz * s)
+        love.graphics.setColor(settings.reaction_color)
+        love.graphics.setLineWidth(0.01)
+        love.graphics.line(x,y,x + dx,y + dy)
+
+        -- print magnitude
+        if settings.draw_load_magnitude then
+            local N = round(math.abs(self.rz))
+            love.graphics.setColor(settings.reaction_color)
+            love.graphics.print(N .. " N",x + dx * 1.2,y + dy * 1.2,0,0.005,-0.005)
+        end
+    end
+end
+
+function Node:draw_reactions()
+    if self.rx then
+        local s = 0.5 -- scale
+        local dx, dy, dz = direction("X")
+        if round(self.rx) == 0 then
+            s = 0
+        else
+            dx, dy, dz = normalize(dx * self.rx, dy * self.rx, dz * self.rx)
+        end
+        love.graphics.setColor(settings.reaction_color)
+        love.graphics.setLineWidth(0.01)
+        love.graphics.line(self.x,self.y,self.x + dx * s,self.y + dy * s)
+
+        -- print magnitude
+        if settings.draw_load_magnitude then
+            local N = round(math.abs(self.rx))
+            love.graphics.setColor(settings.reaction_color)
+            love.graphics.print(N .. " N",self.x + dx * s * 1.2,self.y + dy * s * 1.2,0,0.005,-0.005)
+        end
+    end
+    if self.ry then
+        local s = 0.5 -- scale
+
+        local dx, dy, dz = direction("Y")
+        if round(self.ry) == 0 then
+            s = 0
+        else
+            dx, dy = normalize(dx * self.ry, dy * self.ry,  dz * self.ry)
+        end
+
+        love.graphics.setColor(settings.reaction_color)
+        love.graphics.setLineWidth(0.01)
+        love.graphics.line(self.x,self.y,self.x + dx * s,self.y + dy * s)
+
+        -- print magnitude
+        if settings.draw_load_magnitude then
+            local N = round(math.abs(self.ry))
+            love.graphics.setColor(settings.reaction_color)
+            love.graphics.print(N .. " N",self.x + dx * s * 1.2,self.y + dy * s * 1.2,0,0.005,-0.005)
+        end
+    end
 end

@@ -19,6 +19,14 @@ materials.Aluminum = {
     rho = 2.7e3
 }
 
+materials.Aluminium = {
+    name = "Aluminium",
+    E = 7e10,
+    nu = 0.33,
+    Y = 2.76e8,
+    rho = 2.7e3
+}
+
 materials.Steel = {
     name = "Steel",
     E = 2.1e11,

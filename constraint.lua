@@ -22,7 +22,7 @@ function Constraint:draw()
     local node = Nodes[self.node]
     local x = node.x
     local y = node.y
-    local s = 0.1
+    local s = 0.1 * settings.constraint_size
 
     if self.axis == "Y" then
         y = y - 0.075
@@ -52,9 +52,9 @@ function Constraint:draw3d()
     local x = node.x
     local y = node.y
     local z = node.z
-    local s = 0.1
+    local s = 0.1 * settings.constraint_size
 
-    if self.axis == "X" then
+    if self.axis == "Y" then
         y = y - 0.075
         -- Pin resisting Y movement
         local x1,y1 = iso(x,y,z)
@@ -66,7 +66,7 @@ function Constraint:draw3d()
             x3, y3
         )
 
-    elseif self.axis == "Y" then
+    elseif self.axis == "X" then
         x = x - 0.075
         -- Pin resisting Y movement
         local x1,y1 = iso(x,y,z)

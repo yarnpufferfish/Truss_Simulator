@@ -4,7 +4,6 @@ local truss_data = {}
 truss_data.time_step = 0.0001
 truss_data.node_damping = 10
 
-
 -- Dimension
 truss_data.dimensions = 3
 

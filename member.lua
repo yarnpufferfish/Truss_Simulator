@@ -85,8 +85,13 @@ end
 
 -- draw the member
 function Member:draw()
+    local c
+    if self.stress < 0 then
+        c = color.lerp(settings.zero_stress_color,settings.compression_color,self.failure_percentage)
+    else
+        c = color.lerp(settings.zero_stress_color,settings.tension_color,self.failure_percentage)
+    end
 
-    local c = color.lerp({1,1,1,1},{1,0,0,1},self.failure_percentage)
     love.graphics.setColor(c)
 
     if settings.draw_member_true_size then
@@ -114,8 +119,13 @@ end
 
 -- draw the member
 function Member:draw3d()
-
-    local c = color.lerp({1,1,1,1},{1,0,0,1},self.failure_percentage)
+    local c
+    if self.stress < 0 then
+        c = color.lerp(settings.zero_stress_color,settings.compression_color,self.failure_percentage)
+    else
+        c = color.lerp(settings.zero_stress_color,settings.tension_color,self.failure_percentage)
+    end
+    
     love.graphics.setColor(c)
 
     if settings.draw_member_true_size then

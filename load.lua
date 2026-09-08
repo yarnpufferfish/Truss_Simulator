@@ -21,11 +21,11 @@ end
 
 -- draw the load
 function Load:draw()
-    local s = 0.5 -- scale
+    local s = settings.load_draw_scale-- scale
     local node = Nodes[self.node]
     local x = node.x
     local y = node.y
-    local dx, dy,dz = direction(self.axis)
+    local dx,dy,dz = direction(self.axis)
 
     dx, dy, dz = normalize(dx * self.magnitude, dy * self.magnitude,dz * self.magnitude)
 
@@ -43,7 +43,7 @@ end
 
 -- draw the load
 function Load:draw3d()
-    local s = 0.5 -- scale
+    local s = settings.load_draw_scale-- scale
     local node = Nodes[self.node]
     local x = node.x
     local y = node.y
