@@ -46,7 +46,6 @@ function Mouse:update()
     else
         self.now_state1 = false
         self.disable_tool_this_frame = false
-
     end
     
     -- if right click
@@ -119,6 +118,18 @@ function Mouse:tool_move_camera(dt)
         camera.vx = vx
         camera.vy = vy
     end
+end
 
 
+function Mouse:tool_rotate_camera(dt)
+
+    -- if the mouse is still held add dx dy to camera
+    if self.now_state2 and self.last_state2 then
+        local dx = (self.x - self.last_x) / camera.zoom
+        local dy = (self.y - self.last_y) / camera.zoom
+
+        -- move the camera
+        settings.camera_yaw = settings.camera_yaw - dx
+        settings.camera_pitch = settings.camera_pitch + dy
+    end
 end

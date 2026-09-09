@@ -54,7 +54,8 @@ settings.reaction_color = {0.7,0,0,1}
 
 -- member settings
 settings.draw_members = true
-settings.draw_member_stress = true
+settings.draw_member_stress = false
+settings.draw_member_axial_force = true
 settings.draw_member_number = false
 settings.draw_member_true_size = false
 settings.not_true_size = 0.05

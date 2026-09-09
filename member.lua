@@ -4,6 +4,7 @@ local color = require("colors")
 local mats = require("material")
 local pi = math.pi
 local Pa_to_Pa = require("Pa_to_Pa")
+local N_to_N = require("N_to_N")
 local iso = require("iso")
 
 -- creates a new instance of Member
@@ -111,6 +112,14 @@ function Member:draw()
         love.graphics.setColor({0,1,0.6,1})
         love.graphics.print(Pa .. Units,(x1 + x2) * 0.5 + 0.1,(y1 + y2) * 0.5 + 0.1,0,0.005,-0.005)
     end
+
+    if settings.draw_member_axial_force then
+        local Pa,Units = N_to_N(self.axial_force)
+        love.graphics.setColor({0,1,0.6,1})
+        love.graphics.print(Pa .. Units,(x1 + x2) * 0.5 + 0.1,(y1 + y2) * 0.5 + 0.1,0,0.005,-0.005)
+    end
+
+
     if settings.draw_member_number then
         love.graphics.setColor(settings.text_color)
         love.graphics.print(self.index,(x1 + x2) * 0.5 - 0.2,(y1 + y2) * 0.5 + 0.1,0,0.005,-0.005)
@@ -148,6 +157,19 @@ function Member:draw3d()
         love.graphics.setColor({0,1,0.6,1})
         love.graphics.print(Pa .. Units,(x1 + x2) * 0.5 + 0.1,(y1 + y2) * 0.5 + 0.1,0,0.005,-0.005)
     end
+
+
+    if settings.draw_member_axial_force then
+        local Pa,Units = N_to_N(self.axial_force)
+        love.graphics.setColor({0,1,0.6,1})
+        love.graphics.print(Pa .. Units,(x1 + x2) * 0.5 + 0.1,(y1 + y2) * 0.5 + 0.1,0,0.005,-0.005)
+    end
+
+
+
+
+
+
     if settings.draw_member_number then
         love.graphics.setColor(settings.text_color)
         love.graphics.print(self.index,(x1 + x2) * 0.5 - 0.2,(y1 + y2) * 0.5 + 0.1,0,0.005,-0.005)

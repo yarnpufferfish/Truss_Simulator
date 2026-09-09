@@ -6,7 +6,7 @@
 
 -- ENTER FILE NAME HERE
 -- example files: "truss_3d_extruded.txt" , "truss_2d.txt" , "truss_3d.txt", "pratt_bridge"
-text_file_name = "truss_3d.txt"
+text_file_name = "truss_project.txt"
 
 -- Class Building Tool
 Object = require("classic")
@@ -502,12 +502,7 @@ function InputHandler(dt)
         -- choose the correct mouse tool to use
         if tool_mode == "move" then
             mouse:tool_move_camera(dt)
-        elseif tool_mode == "push" then
-            mouse:tool_push()
-        elseif tool_mode == "follow" then
-            mouse:tool_fish_food()
-        elseif tool_mode == "select" then
-            mouse:tool_select()
+            mouse:tool_rotate_camera(dt)
         end
     end
 end

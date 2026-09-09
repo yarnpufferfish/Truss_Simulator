@@ -4,6 +4,7 @@ local direction = require("direction")
 local normalize = require("normalize")
 local round = require("round")
 local iso = require("iso")
+local N_to_N = require("N_to_N")
 local mats = require("material")
 local pi = math.pi
 
@@ -245,9 +246,10 @@ function Node:draw_reactions3d()
 
         -- print magnitude
         if settings.draw_load_magnitude then
-            local N = round(math.abs(self.rx))
+            local N,Units = N_to_N(self.rx)
+            N = math.abs(N)
             love.graphics.setColor(settings.reaction_color)
-            love.graphics.print(N .. " N",x + dx * 1.2,y + dy * 1.2,0,0.005,-0.005)
+            love.graphics.print(N .. Units,x + dx * 1.2,y + dy * 1.2,0,0.005,-0.005)
         end
     end
     if self.ry then
@@ -265,9 +267,10 @@ function Node:draw_reactions3d()
 
         -- print magnitude
         if settings.draw_load_magnitude then
-            local N = round(math.abs(self.ry))
+            local N,Units = N_to_N(self.ry)
+            N = math.abs(N)
             love.graphics.setColor(settings.reaction_color)
-            love.graphics.print(N .. " N",x + dx * 1.2,y + dy * 1.2,0,0.005,-0.005)
+            love.graphics.print(N .. Units,x + dx * 1.2,y + dy * 1.2,0,0.005,-0.005)
         end
     end
     if self.rz and Truss_data.dimensions == 3 then
@@ -285,9 +288,10 @@ function Node:draw_reactions3d()
 
         -- print magnitude
         if settings.draw_load_magnitude then
-            local N = round(math.abs(self.rz))
+            local N,Units = N_to_N(self.rz)
+            N = math.abs(N)
             love.graphics.setColor(settings.reaction_color)
-            love.graphics.print(N .. " N",x + dx * 1.2,y + dy * 1.2,0,0.005,-0.005)
+            love.graphics.print(N .. Units,x + dx * 1.2,y + dy * 1.2,0,0.005,-0.005)
         end
     end
 end
@@ -307,9 +311,10 @@ function Node:draw_reactions()
 
         -- print magnitude
         if settings.draw_load_magnitude then
-            local N = round(math.abs(self.rx))
+            local N,Units = N_to_N(self.rx)
+            N = math.abs(N)
             love.graphics.setColor(settings.reaction_color)
-            love.graphics.print(N .. " N",self.x + dx * s * 1.2,self.y + dy * s * 1.2,0,0.005,-0.005)
+            love.graphics.print(N .. Units,self.x + dx * 1.2 * s,self.y + dy * 1.2 * s,0,0.005,-0.005)
         end
     end
     if self.ry then
@@ -328,9 +333,10 @@ function Node:draw_reactions()
 
         -- print magnitude
         if settings.draw_load_magnitude then
-            local N = round(math.abs(self.ry))
+            local N,Units = N_to_N(self.ry)
+            N = math.abs(N)
             love.graphics.setColor(settings.reaction_color)
-            love.graphics.print(N .. " N",self.x + dx * s * 1.2,self.y + dy * s * 1.2,0,0.005,-0.005)
+            love.graphics.print(N .. Units,self.x + dx * 1.2 * s,self.y + dy * 1.2 * s,0,0.005,-0.005)
         end
     end
 end
